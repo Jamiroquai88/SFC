@@ -8,7 +8,7 @@ all: main
 debug: CPFLAGS += -DDEBUG -g
 debug: main
 
-main: main.o ivector.o
+main: main.o ivector.o backprop.o
 	$(CP) $(CPFLAGS) $^ -o $@ -lm
 
 %.o:%.cpp

@@ -21,9 +21,11 @@ std::string GetDirname(const std::string& path) {
 int main(int argc, char *argv[]) {
     int c;
     std::string input_list(""), data_dir("");
-    int size = 250;
+    unsigned int size = 250;
+    unsigned int test_vectors = 1;
+    unsigned int hidden_layer_neurons = 2;
 
-    while ((c = getopt(argc, argv, "l:d:i:")) != -1) {
+    while ((c = getopt(argc, argv, "l:d:i:t:")) != -1) {
         switch (c) {
             case 'l':
                 input_list = optarg;
@@ -34,6 +36,9 @@ int main(int argc, char *argv[]) {
             case 'i':
                 size = atoi(optarg);
                 break;
+            case 't':
+            	test_vectors = atoi(optarg);
+            	break;
         }
     }
 
@@ -52,6 +57,11 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    if (test_vectors < 1) {
+    	std::cerr << "Number of test vectors must be above one." << std::endl;
+    	return -1;
+    }
+
     std::ifstream infile(input_list);
     std::string line;
     std::string speaker;
@@ -68,6 +78,9 @@ int main(int argc, char *argv[]) {
         }
         bpnn.Add(ivector);
     }
+
+    bpnn.Init(test_vectors, hidden_layer_neurons);
+    bpnn.Train();
 
 
 
