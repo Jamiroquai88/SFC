@@ -5,6 +5,8 @@
  *      Author: profant
  */
 
+#include <vector>
+
 #include "neuron.h"
 
 
@@ -14,8 +16,10 @@
 class Layer {
 public:
 	Neuron * AddNeuron();
+	std::vector<float> ConcatOutputs();
 
 	std::vector<Neuron> m_neurons;
+	unsigned int m_size;
 };
 
 #endif /* LAYER_H_ */

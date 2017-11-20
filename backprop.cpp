@@ -63,21 +63,27 @@ void BackPropagationNN::Init(unsigned int test_ivectors, unsigned int hidden_lay
 }
 
 void BackPropagationNN::Train() {
+	std::vector<float> train_vectors = Vectors2Matrix(m_trainIVectors);
+	unsigned int rows = m_trainIVectors[0].m_size;
+	unsigned int train_cols = m_trainIVectors.size();
 	do {
-		for (auto trn_ivec : m_trainIVectors) {
-			// Input layer
-			std::vector<float> input_sig = Vector::Sigmoid(trn_ivec.m_data);
+		std::vector<float> input_sig = Vector::Sigmoid(train_vectors);
 
-			// Hidden layer
-			for (unsigned int i = 0; i < m_hiddenLayer.m_neurons.size(); i++)
-				m_hiddenLayer.m_neurons[i].ComputeOutput(input_sig);
+		// Hidden layer
+		for (unsigned int i = 0; i < m_hiddenLayer.m_neurons.size(); i++)
+			m_hiddenLayer.m_neurons[i].ComputeOutput(input_sig, rows, train_cols);
 
-			// Output layer
-//			for (unsigned int i = 0; i < m_outputLayer.m_neurons.size(); i++)
-//				m_outputLayer.m_neurons[i].ComputeOutput()
-		}
+		// Output layer
+		std::vector<float> con_out = m_hiddenLayer.ConcatOutputs();
+		for (auto on : m_outputLayer.m_neurons)
+				on.ComputeOutput(con_out, rows, m_hiddenLayer.m_size);
 	} while (false);
 }
 
-
-
+std::vector<float> BackPropagationNN::Vectors2Matrix(const std::vector<IVector>& vectors) {
+	std::vector<float> out;
+	for (auto vector : vectors)
+		for (auto elem : vector.m_data)
+			out.push_back(elem);
+	return out;
+}

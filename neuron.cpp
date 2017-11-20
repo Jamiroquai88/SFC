@@ -13,11 +13,10 @@
 #include "neuron.h"
 
 
-void Neuron::ComputeOutput(std::vector<float> vector) {
-	unsigned int size = vector.size();
-	std::vector<float> u(size);
+void Neuron::ComputeOutput(std::vector<float> vector, unsigned int rows, unsigned int cols) {
+	std::vector<float> u(rows);
 	for (unsigned int i = 0; i < m_weights.size(); i++)
-		u = u + Vector::Dot(vector, m_weights[i], size, 1, 1);
+		u = u + Vector::Dot(vector, m_weights[i], rows, cols, 1);
 	m_output = Vector::Sigmoid(u);
 }
 

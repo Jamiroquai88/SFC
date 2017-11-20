@@ -24,6 +24,8 @@ public:
     void Init(unsigned int test_ivectors, unsigned int hidden_layer_neurons);
     void Train();
 
+    static std::vector<float> Vectors2Matrix(const std::vector<IVector>& vectors);
+
     unsigned int m_size;
     std::vector<IVector> m_ivectors;
     std::vector<IVector> m_testIVectors;

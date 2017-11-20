@@ -13,7 +13,7 @@
 class Neuron {
 public:
 	void Init(unsigned int weight, unsigned int size, float min_w, float max_w);
-	void ComputeOutput(std::vector<float> vector);
+	void ComputeOutput(std::vector<float> vector, unsigned int rows, unsigned int cols);
 
 	std::vector<std::vector<float>> m_weights;
 	std::vector<float> m_output;
