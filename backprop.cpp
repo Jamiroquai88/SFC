@@ -49,16 +49,16 @@ void BackPropagationNN::Init(unsigned int test_ivectors, unsigned int hidden_lay
 
 	// Hidden layer - initialize neurons and weights
 	for (unsigned int i = 0; i < hidden_layer_neurons; i++) {
-		Neuron n = m_hiddenLayer.AddNeuron();
+		Neuron * n = m_hiddenLayer.AddNeuron();
 		for (unsigned int j = 0; j < m_speakers.size(); j++)
-			n.Init(j, m_size, min_w, max_w);
+			n->Init(j, m_size, min_w, max_w);
 	}
 
 	// Output layer
 	for (unsigned int i = 0; i < m_speakers.size(); i++) {
-		Neuron n = m_outputLayer.AddNeuron();
+		Neuron * n = m_outputLayer.AddNeuron();
 		for (unsigned int j = 0; j < hidden_layer_neurons; j++)
-			n.Init(j, m_size, min_w, max_w);
+			n->Init(j, m_size, min_w, max_w);
 	}
 }
 
@@ -69,11 +69,14 @@ void BackPropagationNN::Train() {
 			std::vector<float> input_sig = Vector::Sigmoid(trn_ivec.m_data);
 
 			// Hidden layer
-			for (auto neuron : m_hiddenLayer.m_neurons) {
-				neuron.ComputeOutput(input_sig);
-			}
+			for (unsigned int i = 0; i < m_hiddenLayer.m_neurons.size(); i++)
+				m_hiddenLayer.m_neurons[i].ComputeOutput(input_sig);
+
+			// Output layer
+//			for (unsigned int i = 0; i < m_outputLayer.m_neurons.size(); i++)
+//				m_outputLayer.m_neurons[i].ComputeOutput()
 		}
-	} while (true);
+	} while (false);
 }
 
 

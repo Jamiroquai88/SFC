@@ -6,6 +6,7 @@
  */
 
 #include <math.h>
+#include <iostream>
 
 #include "vector.h"
 
@@ -25,7 +26,6 @@ std::vector<float> Vector::Dot(const std::vector <float>& m1, const std::vector 
         Output: vector, m1 * m2, product of two vectors m1 and m2,
                 a matrix of size m1_rows x m2_columns
     */
-
     std::vector <float> output (m1_rows*m2_columns);
 
     for( int row = 0; row != m1_rows; ++row ) {
@@ -54,13 +54,6 @@ std::vector<float> Vector::Sigmoid(const std::vector <float>& m1) {
     return output;
 }
 
-std::vector<float> Vector::Add(const std::vector <float>& m1, const std::vector <float>& m2) {
-	unsigned int size = m1.size();
-	std::vector<float> output(size);
-	for (unsigned int i = 0; i < size; i++)
-		output[i] = m1[i] + m2[i];
-	return output;
-}
 
 
 

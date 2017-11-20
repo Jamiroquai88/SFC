@@ -8,10 +8,10 @@
 #include "layer.h"
 
 
-Neuron Layer::AddNeuron() {
+Neuron * Layer::AddNeuron() {
 	Neuron n = Neuron();
 	m_neurons.push_back(n);
-	return n;
+	return &m_neurons.back();
 }
 
 

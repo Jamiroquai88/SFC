@@ -13,7 +13,7 @@
 
 class Layer {
 public:
-	Neuron AddNeuron();
+	Neuron * AddNeuron();
 
 	std::vector<Neuron> m_neurons;
 };
