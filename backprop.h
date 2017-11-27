@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <set>
+#include <map>
 
 #include "ivector.h"
 #include "neuron.h"
@@ -17,21 +18,25 @@
 class BackPropagationNN {
 public:
 
-    BackPropagationNN() : m_size(0) {};
+    BackPropagationNN() : m_vectorSize(0) {};
 
     void Add(const IVector& ivec);
     std::vector<IVector> GetSpeakerData(std::string speaker);
+    std::vector<float> GetMapping();
+    float GetTotalError(const std::vector<float>& prediction, const std::vector<float>& labels);
     void Init(unsigned int test_ivectors, unsigned int hidden_layer_neurons);
-    void Train();
+    void Train(float eps);
+    void Test();
 
     static std::vector<float> Vectors2Matrix(const std::vector<IVector>& vectors);
 
-    unsigned int m_size;
+    unsigned int m_vectorSize;
     std::vector<IVector> m_ivectors;
     std::vector<IVector> m_testIVectors;
     std::vector<IVector> m_trainIVectors;
 
-    std::set<std::string> m_speakers;
+    std::vector<std::string> m_speakers;
+    std::map<std::string, int> m_mapping;
 
     Layer m_inputLayer;
     Layer m_hiddenLayer;

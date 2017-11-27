@@ -21,9 +21,9 @@ std::string GetDirname(const std::string& path) {
 int main(int argc, char *argv[]) {
     int c;
     std::string input_list(""), data_dir("");
-    unsigned int size = 250;
-    unsigned int test_vectors = 1;
-    unsigned int hidden_layer_neurons = 2;
+    unsigned int size = 1;
+    unsigned int test_vectors = 0;
+    unsigned int hidden_layer_neurons = 1;
 
     while ((c = getopt(argc, argv, "l:d:i:t:")) != -1) {
         switch (c) {
@@ -57,8 +57,8 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    if (test_vectors < 1) {
-    	std::cerr << "Number of test vectors must be above one." << std::endl;
+    if (test_vectors < 0) {
+    	std::cerr << "Number of test vectors must be above zero." << std::endl;
     	return -1;
     }
 
@@ -80,7 +80,9 @@ int main(int argc, char *argv[]) {
     }
 
     bpnn.Init(test_vectors, hidden_layer_neurons);
-    bpnn.Train();
+
+    float eps = 0.01f;
+    bpnn.Train(eps);
 
 
 

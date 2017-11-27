@@ -54,6 +54,48 @@ std::vector<float> Vector::Sigmoid(const std::vector <float>& m1) {
     return output;
 }
 
+std::vector<float> Vector::SigmoidDer(const std::vector <float>& m1) {
 
+    /*  Returns the value of the sigmoid function derivative f'(x) = f(x)(1 - f(x)),
+        where f(x) is sigmoid function.
+        Input: m1, a vector.
+        Output: x(1 - x) for every element of the input matrix m1.
+    */
 
+    const unsigned long VECTOR_SIZE = m1.size();
+    std::vector<float> output (VECTOR_SIZE);
 
+    for( unsigned i = 0; i != VECTOR_SIZE; ++i ) {
+        output[ i ] = m1[ i ] * (1 - m1[ i ]);
+    }
+
+    return output;
+}
+
+std::vector <float> Vector::Transpose (float *m, const int C, const int R) {
+
+     /*  Returns a transpose matrix of input matrix.
+         Inputs:
+             m: vector, input matrix
+             C: int, number of columns in the input matrix
+             R: int, number of rows in the input matrix
+         Output: vector, transpose matrix mT of input matrix m
+     */
+
+     std::vector <float> mT (C*R);
+
+     for(int n = 0; n!=C*R; n++) {
+         int i = n/C;
+         int j = n%C;
+         mT[n] = m[R*j + i];
+     }
+
+     return mT;
+}
+
+std::vector<float> Vector::SubVector(const std::vector<float>& vec, unsigned int start, unsigned int end) {
+	std::vector<float>::const_iterator first = vec.begin() + start;
+	std::vector<float>::const_iterator last = vec.begin() + end;
+	std::vector<float> newVec(first, last);
+	return newVec;
+}

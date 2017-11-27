@@ -16,7 +16,7 @@ public:
 
     bool Init(std::string filename);
 
-    int m_size;
+    unsigned int m_size;
     std::vector<float> m_data;
     std::string m_speaker;
 };

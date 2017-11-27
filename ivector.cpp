@@ -13,7 +13,7 @@ bool IVector::Init(std::string filename) {
     std::ifstream file(filename, std::ifstream::in);
     if (file) {
         float myf;
-        for (int i = 0; i < m_size; i++) {
+        for (unsigned int i = 0; i < m_size; i++) {
             file >> myf;
             this->m_data.push_back(myf);
         }
