@@ -21,11 +21,12 @@ std::string GetDirname(const std::string& path) {
 int main(int argc, char *argv[]) {
     int c;
     std::string input_list(""), data_dir("");
-    unsigned int size = 1;
-    unsigned int test_vectors = 0;
-    unsigned int hidden_layer_neurons = 1;
+    float eps = 0.01f;
+    unsigned int size = 250;
+    unsigned int test_vectors = 2;
+    unsigned int hidden_layer_neurons = 20;
 
-    while ((c = getopt(argc, argv, "l:d:i:t:")) != -1) {
+    while ((c = getopt(argc, argv, "l:d:i:t:e:h:")) != -1) {
         switch (c) {
             case 'l':
                 input_list = optarg;
@@ -38,6 +39,12 @@ int main(int argc, char *argv[]) {
                 break;
             case 't':
             	test_vectors = atoi(optarg);
+            	break;
+            case 'e':
+            	eps = atof(optarg);
+            	break;
+            case 'h':
+            	hidden_layer_neurons = atoi(optarg);
             	break;
         }
     }
@@ -70,7 +77,6 @@ int main(int argc, char *argv[]) {
 
     while (std::getline(infile, line)) {
         speaker = GetDirname(line);
-        std::cout << line << " " << speaker << std::endl;
         IVector ivector = IVector(size, speaker);
         if (!ivector.Init(data_dir + '/' + line)) {
             std::cerr << "Failed to read i-vector from " << line << "." << std::endl;
@@ -81,12 +87,9 @@ int main(int argc, char *argv[]) {
 
     bpnn.Init(test_vectors, hidden_layer_neurons);
 
-    float eps = 0.01f;
     bpnn.Train(eps);
 
-
-
-        return 0;
+    return 0;
 }
 
 

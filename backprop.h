@@ -22,11 +22,12 @@ public:
 
     void Add(const IVector& ivec);
     std::vector<IVector> GetSpeakerData(std::string speaker);
-    std::vector<float> GetMapping();
+    std::vector<float> GetLabels(IVector& ivector);
     float GetTotalError(const std::vector<float>& prediction, const std::vector<float>& labels);
     void Init(unsigned int test_ivectors, unsigned int hidden_layer_neurons);
     void Train(float eps);
-    void Test();
+    float Test();
+    std::vector<float> ForwardPass(std::vector<float> vector);
 
     static std::vector<float> Vectors2Matrix(const std::vector<IVector>& vectors);
 

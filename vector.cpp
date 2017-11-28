@@ -99,3 +99,7 @@ std::vector<float> Vector::SubVector(const std::vector<float>& vec, unsigned int
 	std::vector<float> newVec(first, last);
 	return newVec;
 }
+
+float Vector::Sigmoid(const float& m1) {
+	return 1 / (1 + exp(-m1));
+}

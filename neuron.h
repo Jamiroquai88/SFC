@@ -12,14 +12,14 @@
 
 class Neuron {
 public:
-	void Init(unsigned int, unsigned int, float, float);
-	void ComputeOutput(std::vector<float>, std::vector<float>, unsigned int, unsigned int);
+	void InitWeight(float, float);
+	void ComputeOutput(std::vector<float>);
 	std::vector<float> ConcatWeights();
 
-	std::vector<std::vector<float>> m_weights;
-	std::vector<float> m_output;
-	std::vector<float> m_input;
-//	std::vector<float> m_bias;
+	std::vector<float> m_weights;
+	float m_output;
+	float m_input;
+	float m_bias;
 };
 
 #endif /* NEURON_H_ */

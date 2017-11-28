@@ -54,88 +54,66 @@ void BackPropagationNN::Init(unsigned int num_test_ivectors, unsigned int hidden
 	// Hidden layer - initialize neurons and weights
 	for (unsigned int i = 0; i < hidden_layer_neurons; i++) {
 		Neuron * n = m_hiddenLayer.AddNeuron();
-		for (unsigned int j = 0; j < m_trainIVectors.size(); j++)
-			n->Init(j, m_vectorSize, min_w, max_w);
+		for (unsigned int j = 0; j < m_vectorSize; j++)
+			n->InitWeight(min_w, max_w);
 	}
 
 	// Output layer - initialize neurons and weights
-	for (unsigned int i = 0; i < m_trainIVectors.size(); i++) {
+	for (unsigned int i = 0; i < m_speakers.size(); i++) {
 		Neuron * n = m_outputLayer.AddNeuron();
 		for (unsigned int j = 0; j < hidden_layer_neurons; j++)
-			n->Init(j, m_vectorSize, min_w, max_w);
+			n->InitWeight(min_w, max_w);
 	}
-
-	// Initialize hard coded
-//	m_hiddenLayer.m_neurons[0].m_weights[0] = {0.15};
-//	m_hiddenLayer.m_neurons[0].m_weights[1] = {0.20};
-//	m_hiddenLayer.m_neurons[0].m_bias = {0.35};
-//	m_hiddenLayer.m_neurons[1].m_weights[0] = {0.25};
-//	m_hiddenLayer.m_neurons[1].m_weights[1] = {0.30};
-//	m_hiddenLayer.m_neurons[1].m_bias = {0.35};
-//	m_outputLayer.m_neurons[0].m_weights[0] = {0.40};
-//	m_outputLayer.m_neurons[0].m_weights[1] = {0.45};
-//	m_outputLayer.m_neurons[0].m_bias = {0.60};
-//	m_outputLayer.m_neurons[1].m_weights[0] = {0.50};
-//	m_outputLayer.m_neurons[1].m_weights[1] = {0.55};
-//	m_outputLayer.m_neurons[1].m_bias = {0.60};
 }
 
 void BackPropagationNN::Train(float eps) {
-	std::vector<float> train_vectors = Vector::Sigmoid(Vectors2Matrix(m_trainIVectors));
-	unsigned int rows = m_vectorSize;
-	unsigned int train_cols = m_trainIVectors.size();
-	std::vector<float> labels = GetMapping();
+	unsigned int epoch = 1;
+	float best_accuracy = 0.0f;
 	do {
-		// Hidden layer
-		for (unsigned int i = 0; i < m_hiddenLayer.m_neurons.size(); i++)
-			m_hiddenLayer.m_neurons[i].ComputeOutput(train_vectors, m_hiddenLayer.m_neurons[i].ConcatWeights(), rows, train_cols);
 
-		// Output of hidden layer
-		std::vector<float> hiddenl_output = m_hiddenLayer.ConcatOutputs();
+		// for all training i-vectors
+		for (unsigned int i = 0; i < m_trainIVectors.size(); i++) {
+			// Get output - forward pass
+			std::vector<float> prediction = ForwardPass(m_trainIVectors[i].m_data);
 
-		std::cout << "Size of hidden layer output: " << hiddenl_output.size() << std::endl;
+			// Get labels
+			std::vector<float> labels = GetLabels(m_trainIVectors[i]);
 
-		// Output layer
-		for (unsigned int i = 0; i < m_outputLayer.m_neurons.size(); i++)
-			m_outputLayer.m_neurons[i].ComputeOutput(hiddenl_output, m_outputLayer.m_neurons[i].ConcatWeights(), rows, m_hiddenLayer.m_size);
+			// Compute error
+			std::vector<float> prediction_error = prediction - labels;
 
-		// Get output
-		std::vector<float> prediction = m_outputLayer.ConcatOutputs();
+			std::vector<float> hiddenl_weights;
 
-//		std::vector<float> tmp = Vector::Dot(prediction, )
-
-		// Compute error
-		float total_error = GetTotalError(prediction, labels);
-		std::cout << "Total Prediction Error: " << total_error << std::endl;
-		std::vector<float> prediction_error = prediction - labels;
-
-		std::vector<std::vector<float>> hiddenl_weights;
-
-		// Output layer update
-		for (unsigned int i = 0; i < m_outputLayer.m_neurons.size(); i++)
-			for (unsigned int j = 0; j < m_outputLayer.m_neurons[i].m_weights.size(); j++)
-				hiddenl_weights.push_back(m_outputLayer.m_neurons[i].m_weights[j] - eps *
-				(prediction_error[i] * (prediction[i] * (1.0f - prediction[i])) * m_hiddenLayer.m_neurons[j].m_output));
-
-		// Hidden layer update
-		for (unsigned int i = 0; i < m_hiddenLayer.m_neurons.size(); i++) {
-			std::vector<float> sum(rows);
+			// Output layer update
 			for (unsigned int j = 0; j < m_outputLayer.m_neurons.size(); j++)
-				sum = sum + prediction_error[j] * (prediction[j] * (1.0f - prediction[j])) * m_outputLayer.m_neurons[j].m_weights[i];
-			for (unsigned int j = 0; j < m_outputLayer.m_neurons.size(); j++) {
-				std::vector<float> comp = (sum * (m_hiddenLayer.m_neurons[i].m_output -
-						m_hiddenLayer.m_neurons[i].m_output * m_hiddenLayer.m_neurons[i].m_output)) * train_vectors[j];
-				m_hiddenLayer.m_neurons[i].m_weights[j] = m_hiddenLayer.m_neurons[i].m_weights[j] - eps * comp;
+				for (unsigned int k = 0; k < m_outputLayer.m_neurons[j].m_weights.size(); k++)
+					hiddenl_weights.push_back(m_outputLayer.m_neurons[j].m_weights[k] - eps *
+					(prediction_error[j] * (prediction[j] * (1.0f - prediction[j])) * m_hiddenLayer.m_neurons[k].m_output));
+
+			// Hidden layer update
+			for (unsigned int j = 0; j < m_hiddenLayer.m_neurons.size(); j++) {
+				float sum = 0.0f;
+				for (unsigned int k = 0; k < m_outputLayer.m_neurons.size(); k++)
+					sum = sum + prediction_error[k] * (prediction[k] * (1.0f - prediction[k])) * m_outputLayer.m_neurons[k].m_weights[j];
+				for (unsigned int k = 0; k < m_outputLayer.m_neurons.size(); k++) {
+					float comp = (sum * (m_hiddenLayer.m_neurons[j].m_output -
+							m_hiddenLayer.m_neurons[j].m_output * m_hiddenLayer.m_neurons[j].m_output)) * m_trainIVectors[i].m_data[k];
+					m_hiddenLayer.m_neurons[j].m_weights[k] = m_hiddenLayer.m_neurons[j].m_weights[k] - eps * comp;
+				}
 			}
+
+			// Assign updated weights
+			for (unsigned int i = 0; i < m_outputLayer.m_neurons.size(); i++)
+				for (unsigned int j = 0; j < m_outputLayer.m_neurons[i].m_weights.size(); j++)
+					m_outputLayer.m_neurons[i].m_weights[j] = hiddenl_weights[i * m_outputLayer.m_neurons[i].m_weights.size() + j];
 		}
-
-		// Assign updated weights
-		for (unsigned int i = 0; i < m_outputLayer.m_neurons.size(); i++)
-			for (unsigned int j = 0; j < m_outputLayer.m_neurons[i].m_weights.size(); j++)
-				m_outputLayer.m_neurons[i].m_weights[j] = hiddenl_weights[i * m_outputLayer.m_neurons[i].m_weights.size() + j];
-
-//		Test();
-
+		// test on testing data
+		float accuracy = Test();
+		if (accuracy > best_accuracy) {
+			best_accuracy = accuracy;
+			std::cout << "Epoch: " << epoch << ", Test Accuracy: " <<  best_accuracy << "%" << std::endl;
+		}
+		epoch++;
 	} while (true);
 }
 
@@ -147,11 +125,13 @@ std::vector<float> BackPropagationNN::Vectors2Matrix(const std::vector<IVector>&
 	return out;
 }
 
-std::vector<float> BackPropagationNN::GetMapping() {
+std::vector<float> BackPropagationNN::GetLabels(IVector& ivector) {
 	std::vector<float> out;
-	unsigned int size = m_trainIVectors.size();
-	for (unsigned int i = 0; i < size; i++)
-		out.push_back((float)m_mapping[m_trainIVectors[i].m_speaker] / (float)size);
+	for (unsigned int i = 0; i < m_outputLayer.m_size; i++)
+		if (ivector.m_speaker == m_speakers[i])
+			out.push_back(1.0f);
+		else
+			out.push_back(0.0f);
 	return out;
 }
 
@@ -162,21 +142,29 @@ float BackPropagationNN::GetTotalError(const std::vector<float>& prediction, con
 	return error;
 }
 
-void BackPropagationNN::Test() {
-	std::vector<float> test_vectors = Vector::Sigmoid(Vectors2Matrix(m_testIVectors));
-	unsigned int rows = m_vectorSize;
-	unsigned int train_cols = m_trainIVectors.size();
+float BackPropagationNN::Test() {
+	std::vector<float> prediction;
+	unsigned int class_index;
+	unsigned int hit = 0;
+	for (unsigned int i = 0; i < m_testIVectors.size(); i++) {
+		 prediction = ForwardPass(m_testIVectors[i].m_data);
+		 class_index = std::distance(prediction.begin(), std::max_element(prediction.begin(), prediction.end()));
+		 if (m_speakers[class_index] == m_testIVectors[i].m_speaker)
+			 hit++;
+	}
+	return (float)hit / (float)m_testIVectors.size() * 100;
+}
 
-	for (unsigned int i = 0; i < m_hiddenLayer.m_neurons.size(); i++)
-		m_hiddenLayer.m_neurons[i].ComputeOutput(test_vectors, m_hiddenLayer.m_neurons[i].ConcatWeights(), rows, train_cols);
+std::vector<float> BackPropagationNN::ForwardPass(std::vector<float> vector) {
+	// Hidden layer
+	for (unsigned int j = 0; j < m_hiddenLayer.m_neurons.size(); j++)
+		m_hiddenLayer.m_neurons[j].ComputeOutput(vector);
 
 	// Output of hidden layer
 	std::vector<float> hiddenl_output = m_hiddenLayer.ConcatOutputs();
 
 	// Output layer
-	for (unsigned int i = 0; i < m_outputLayer.m_neurons.size(); i++)
-		m_outputLayer.m_neurons[i].ComputeOutput(hiddenl_output, m_outputLayer.m_neurons[i].ConcatWeights(), rows, m_hiddenLayer.m_size);
-
-	// Get output
-	std::vector<float> prediction = m_outputLayer.ConcatOutputs();
+	for (unsigned int j = 0; j < m_outputLayer.m_neurons.size(); j++)
+		m_outputLayer.m_neurons[j].ComputeOutput(hiddenl_output);
+	return m_outputLayer.ConcatOutputs();
 }
