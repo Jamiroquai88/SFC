@@ -21,10 +21,10 @@ std::string GetDirname(const std::string& path) {
 int main(int argc, char *argv[]) {
     int c;
     std::string input_list(""), data_dir("");
-    float eps = 0.01f;
+    float eps = 0.1f;
     unsigned int size = 250;
     unsigned int test_vectors = 2;
-    unsigned int hidden_layer_neurons = 20;
+    unsigned int hidden_layer_neurons = 200;
 
     while ((c = getopt(argc, argv, "l:d:i:t:e:h:")) != -1) {
         switch (c) {
