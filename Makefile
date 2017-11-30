@@ -16,3 +16,6 @@ main: main.o ivector.o vector.o layer.o neuron.o backprop.o
 
 clean:
 	$(RM) main $(OBJ_FILES) *.h.gch
+
+zip:
+	zip -r xprofa00.zip *.cpp *.h Makefile run.sh data/ data_l2-norm list.txt xprofa00.pdf
